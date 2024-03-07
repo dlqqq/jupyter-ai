@@ -5,7 +5,7 @@ import os
 import re
 import sys
 import warnings
-from typing import Optional
+from typing import Dict, Optional, Union
 
 import click
 from IPython import get_ipython
@@ -30,6 +30,7 @@ from .parsers import (
     line_magic_parser,
 )
 from .providers import BaseProvider
+from .model_id import ModelId
 
 
 class TextOrMarkdown:
@@ -122,6 +123,8 @@ class CellMagicError(BaseException):
 
 @magics_class
 class AiMagics(Magics):
+    custom_model_registry: Dict[str, Union[str, LLMChain]]
+
     def __init__(self, shell):
         super().__init__(shell)
         self.transcript_openai = []
@@ -415,13 +418,13 @@ class AiMagics(Magics):
 
         return self.run_ai_cell(cell_args, prompt)
 
-    def _decompose_model_id(self, model_id: str):
-        """Breaks down a model ID into a two-tuple (provider_id, local_model_id). Returns (None, None) if indeterminate."""
+    def _serialize_model_id(self, model_id: str) -> ModelId:
+        """
+        Accepts a model ID string and serializes it into a `ModelId` object.
+        """
         # custom_model_registry maps keys to either a model name (a string) or an LLMChain.
         # If this is an alias to another model, expand the full name of the model.
-        if model_id in self.custom_model_registry and isinstance(
-            self.custom_model_registry[model_id], str
-        ):
+        if isinstance(self.custom_model_registry.get(model_id), str):
             model_id = self.custom_model_registry[model_id]
 
         return decompose_model_id(model_id, self.providers)
@@ -479,7 +482,7 @@ class AiMagics(Magics):
         return __version__
 
     def run_ai_cell(self, args: CellArgs, prompt: str):
-        provider_id, local_model_id = self._decompose_model_id(args.model_id)
+        provider_id, local_model_id = self._serialize_model_id(args.model_id)
 
         # If this is a custom chain, send the message to the custom chain.
         if args.model_id in self.custom_model_registry and isinstance(
