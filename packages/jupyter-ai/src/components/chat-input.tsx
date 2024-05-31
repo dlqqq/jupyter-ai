@@ -11,7 +11,8 @@ import {
   Checkbox,
   IconButton,
   InputAdornment,
-  Typography
+  Typography,
+  Chip
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import {
@@ -76,23 +77,34 @@ function renderSlashCommandOption(
 
   return (
     <li {...optionProps}>
-      <Box sx={{ lineHeight: 0, marginRight: 2, opacity: 0.618 }}>{icon}</Box>
-      <Box sx={{ flexGrow: 1 }}>
-        <Typography
-          component="span"
-          sx={{
-            fontSize: 'var(--jp-ui-font-size1)'
-          }}
-        >
-          {option.label + ' - '}
-        </Typography>
-        <Typography
-          component="span"
-          sx={{ opacity: 0.618, fontSize: 'var(--jp-ui-font-size0)' }}
-        >
-          {option.description}
-        </Typography>
-      </Box>
+      <Chip
+        label={option.label}
+        avatar={icon}
+        sx={{
+          color: 'white',
+          backgroundColor: 'var(--jp-jupyter-icon-color)',
+          marginRight: 2,
+          '& .MuiChip-avatar': {
+            color: 'white',
+            width: '16px',
+            height: '16px',
+            marginLeft: 2
+          },
+          '& .MuiChip-label': {
+            fontSize: 'var(--jp-ui-font-size1)',
+            fontFamily: 'monospace'
+          }
+        }}
+      />
+      <Typography
+        component="span"
+        sx={{
+          opacity: 0.618,
+          fontSize: 'var(--jp-ui-font-size1)'
+        }}
+      >
+        {option.description}
+      </Typography>
     </li>
   );
 }
@@ -219,13 +231,18 @@ export function ChatInput(props: ChatInputProps): JSX.Element {
         componentsProps={{
           popper: {
             placement: 'top'
+          },
+          paper: {
+            sx: {
+              width: 'max-content'
+            }
           }
         }}
         renderOption={renderSlashCommandOption}
         ListboxProps={{
           sx: {
             '& .MuiAutocomplete-option': {
-              padding: 2
+              padding: '4px 8px'
             }
           }
         }}
