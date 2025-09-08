@@ -18,4 +18,3 @@ class ToolCallOutput(BaseModel):
     role: str = "tool"
     name: str
     content: str
-
